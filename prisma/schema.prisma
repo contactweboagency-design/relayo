@@ -3,8 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Connexion directe (sans -pooler) pour `prisma db push` / migrations
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model User {

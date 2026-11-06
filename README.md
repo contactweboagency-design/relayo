@@ -13,24 +13,25 @@ Outil d'automatisation Instagram : réponds automatiquement aux commentaires, au
 
 ## Stack
 
-Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · React Flow · Prisma · PostgreSQL.
+Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · React Flow · Prisma · PostgreSQL sur Neon (driver serverless `@neondatabase/serverless` + `@prisma/adapter-neon`).
 
 ## Lancer en local
 
 ```bash
-cp .env.example .env        # puis renseigne DATABASE_URL et AUTH_SECRET
+cp .env.example .env        # puis renseigne AUTH_SECRET
 npm install
-npx prisma db push          # crée les tables
+neon env pull               # récupère DATABASE_URL et DATABASE_URL_UNPOOLED du projet Neon lié (neon.ts / .neon)
+npx prisma db push          # crée les tables (via la connexion directe)
 npm run dev
 ```
 
 Ouvre http://localhost:3000, crée un compte, puis va dans **Simulateur** : choisis la première publication, envoie « LIEN » et clique sur le bouton reçu.
 
-## Déployer (Vercel + Neon/Supabase)
+## Déployer (Vercel + Neon)
 
-1. Crée une base PostgreSQL (Neon, Supabase, Vercel Postgres…) et récupère son URL.
+1. Récupère `DATABASE_URL` (pooled) et `DATABASE_URL_UNPOOLED` (directe) avec `neon env pull`, ou dans la console Neon.
 2. Importe le dépôt sur Vercel et ajoute les variables de `.env.example` (`APP_URL` = l'URL Vercel).
-3. Les tables sont créées automatiquement à chaque déploiement (`prisma db push` dans le script `build`).
+3. Les tables sont créées automatiquement à chaque déploiement Vercel (`prisma db push` dans le script `vercel-build`, via la connexion directe).
 4. `vercel.json` déclare un cron chaque minute sur `/api/cron` (étapes « Attendre » + renouvellement des jetons). Le plan gratuit de Vercel limite les crons à un par jour : sur ce plan, utilise un service externe (cron-job.org…) qui appelle `GET /api/cron` avec l'en-tête `Authorization: Bearer <CRON_SECRET>`.
 
 ## Brancher Instagram

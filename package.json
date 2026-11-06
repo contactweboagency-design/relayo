@@ -4,29 +4,38 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push --skip-generate && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma db push --skip-generate && next build"
   },
   "dependencies": {
+    "@neon/config": "^1.12.1",
+    "@neon/env": "^2.0.1",
+    "@neondatabase/serverless": "^1.2.0",
+    "@prisma/adapter-neon": "^6.19.3",
     "@prisma/client": "^6.19.0",
+    "@vercel/functions": "^3.11.0",
     "@xyflow/react": "^12.8.0",
     "bcryptjs": "^3.0.2",
     "jose": "^6.0.11",
     "lucide-react": "^0.540.0",
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "ws": "^8.22.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@types/ws": "^8.18.2",
+    "https-proxy-agent": "^9.1.0",
     "prisma": "^6.19.0",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.9.0"
