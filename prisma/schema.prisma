@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  account      IgAccount?
+  automations  Automation[]
+  contacts     Contact[]
+}
+
+// Compte Instagram professionnel connecté (ou compte de démonstration)
+model IgAccount {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  igUserId       String    @unique
+  username       String
+  profilePic     String?
+  accessToken    String?
+  tokenExpiresAt DateTime?
+  isDemo         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+enum TriggerType {
+  DM_KEYWORD
+  COMMENT_KEYWORD
+  STORY_REPLY
+  DEFAULT_REPLY
+}
+
+enum MatchType {
+  CONTAINS
+  EXACT
+}
+
+model Automation {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  active      Boolean     @default(false)
+  triggerType TriggerType
+  keywords    String[]
+  matchType   MatchType   @default(CONTAINS)
+  postId      String?
+  // Graphe du scénario : { nodes: [...], edges: [...] } au format React Flow
+  flow        Json
+  runs        Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  jobs        Job[]
+
+  @@index([userId, triggerType, active])
+}
+
+model Contact {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  igsid             String
+  username          String?
+  name              String?
+  tags              String[]
+  isDemo            Boolean   @default(false)
+  lastInteractionAt DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  messages          Message[]
+  jobs              Job[]
+
+  @@unique([userId, igsid])
+}
+
+enum Direction {
+  IN
+  OUT
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  contactId String
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  direction Direction
+  // dm | comment | comment_reply | story_reply | button
+  kind      String    @default("dm")
+  text      String
+  // boutons envoyés, id de commentaire, erreurs d'envoi...
+  meta      Json?
+  status    String    @default("sent")
+  createdAt DateTime  @default(now())
+
+  @@index([contactId, createdAt])
+}
+
+// Étape différée (bloc "Attendre")
+model Job {
+  id           String     @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  contactId    String
+  contact      Contact    @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  nodeId       String
+  runAt        DateTime
+  status       String     @default("pending")
+  context      Json?
+  createdAt    DateTime   @default(now())
+
+  @@index([status, runAt])
+}
