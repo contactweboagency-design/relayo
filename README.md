@@ -32,7 +32,7 @@ Ouvre http://localhost:3000, crée un compte, puis va dans **Simulateur** : choi
 1. Récupère `DATABASE_URL` (pooled) et `DATABASE_URL_UNPOOLED` (directe) avec `neon env pull`, ou dans la console Neon.
 2. Importe le dépôt sur Vercel et ajoute les variables de `.env.example` (`APP_URL` = l'URL Vercel).
 3. Les tables sont créées automatiquement à chaque déploiement Vercel (`prisma db push` dans le script `vercel-build`, via la connexion directe).
-4. `vercel.json` déclare un cron chaque minute sur `/api/cron` (étapes « Attendre » + renouvellement des jetons). Le plan gratuit de Vercel limite les crons à un par jour : sur ce plan, utilise un service externe (cron-job.org…) qui appelle `GET /api/cron` avec l'en-tête `Authorization: Bearer <CRON_SECRET>`.
+4. `vercel.json` déclare un cron quotidien sur `/api/cron` (renouvellement des jetons + étapes « Attendre » en retard), car le plan gratuit de Vercel limite les crons à un par jour. Pour que les blocs « Attendre » partent à la minute près, ajoute un service externe (cron-job.org…) qui appelle `GET /api/cron` chaque minute avec l’en-tête `Authorization: Bearer <CRON_SECRET>`.
 
 ## Brancher Instagram
 
